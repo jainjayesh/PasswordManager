@@ -28,15 +28,6 @@
  */
 package jpass;
 
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.plaf.ColorUIResource;
-import javax.swing.plaf.metal.DefaultMetalTheme;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-
-import jpass.ui.JPassFrame;
-import jpass.util.Configuration;
-
 import static jpass.ui.MessageDialog.getIcon;
 
 import java.awt.AWTException;
@@ -52,6 +43,16 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.metal.DefaultMetalTheme;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+
+import jpass.ui.JPassFrame;
+import jpass.ui.action.MenuActionType;
+import jpass.util.Configuration;
 
 /**
  * Entry point of JPass.
@@ -132,16 +133,25 @@ public class JPass {
                 // create a popup menu
                 PopupMenu popup =  new PopupMenu();
                 // create menu item for the default action
-                MenuItem defaultItem = new MenuItem("Exit");
-                defaultItem.addActionListener(new ActionListener() {
+                MenuItem exitItem = new MenuItem("Exit");
+                exitItem.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						System.exit(0);
 					}
 				});
-                popup.add(defaultItem);
+                popup.add(exitItem);
+                popup.addSeparator();
+                MenuItem openItem = new MenuItem("Open");
+                openItem.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						JPassFrame.getInstance().setVisible(Boolean.TRUE);
+					}
+				});
+                popup.add(openItem);
                 // construct a TrayIcon
-                trayIcon = new TrayIcon(image, "Tray Demo", popup);
+                trayIcon = new TrayIcon(image, "JPass", popup);
                 // set the TrayIcon properties
                 trayIcon.addActionListener(new ActionListener() {
 					
@@ -161,22 +171,18 @@ public class JPass {
 
 					@Override
 					public void mousePressed(MouseEvent e) {
-						
 					}
 
 					@Override
 					public void mouseReleased(MouseEvent e) {
-						
 					}
 
 					@Override
 					public void mouseEntered(MouseEvent e) {
-						
 					}
 
 					@Override
 					public void mouseExited(MouseEvent e) {
-						
 					}
 				});
                 // ...

@@ -36,12 +36,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import jpass.crypt.io.CryptInputStream;
 import jpass.crypt.io.CryptOutputStream;
 import jpass.xml.bind.Entries;
+import jpass.xml.bind.Entry;
 import jpass.xml.converter.XmlConverter;
 
 import static jpass.util.StringUtils.stripString;
@@ -144,6 +147,7 @@ public final class DocumentHelper {
             } else {
                 outputStream = new GZIPOutputStream(new CryptOutputStream(new BufferedOutputStream(new FileOutputStream(this.fileName)), this.key));
             }
+            updateLastModifiedDate(document);
             CONVERTER.write(document, outputStream);
         } catch (Exception e) {
             throw new DocumentProcessException(stripString(e.getMessage()));
@@ -153,4 +157,17 @@ public final class DocumentHelper {
             }
         }
     }
+
+	private void updateLastModifiedDate(Entries document) {
+		for(Entry e :document.getEntry()) {
+			if(e.isModified()) {
+				e.setModified(Boolean.FALSE);
+				e.setModifiedDate(new Date());
+			}
+			if(e.isPasswordChanged()) {
+				e.setPasswordChanged(Boolean.FALSE);
+				e.setLastPasswordChanged(new Date());
+			}
+		}
+	}
 }

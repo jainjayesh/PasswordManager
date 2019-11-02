@@ -40,11 +40,27 @@ public class Entry {
     protected String user;
     protected String password;
     protected String notes;
-    protected Date createdDate;
+    protected Date modifiedDate;
     protected Date lastPasswordChanged;
     protected int changePasswordInDays;
+    protected boolean isModified;
+    protected boolean isPasswordChanged;
 
     /**
+	 * @return the isModified
+	 */
+	public boolean isModified() {
+		return isModified;
+	}
+
+	/**
+	 * @param isModified the isModified to set
+	 */
+	public void setModified(boolean isModified) {
+		this.isModified = isModified;
+	}
+
+	/**
      * Gets the value of the title property.
      *
      * @return possible object is {@link String}
@@ -145,17 +161,17 @@ public class Entry {
     }
 
 	/**
-	 * @return the createdDate
+	 * @return the modifiedDate
 	 */
-	public Date getCreatedDate() {
-		return createdDate;
+	public Date getModifiedDate() {
+		return modifiedDate;
 	}
 
 	/**
-	 * @param createdDate the createdDate to set
+	 * @param modifiedDate the modifiedDate to set
 	 */
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
+	public void setModifiedDate(Date modifiedDate) {
+		this.modifiedDate = modifiedDate;
 	}
 
 	/**
@@ -184,6 +200,92 @@ public class Entry {
 	 */
 	public void setChangePasswordInDays(int changePasswordInDays) {
 		this.changePasswordInDays = changePasswordInDays;
+	}
+
+	/**
+	 * @return the isPasswordChanged
+	 */
+	public boolean isPasswordChanged() {
+		return isPasswordChanged;
+	}
+
+	/**
+	 * @param isPasswordChanged the isPasswordChanged to set
+	 */
+	public void setPasswordChanged(boolean isPasswordChanged) {
+		this.isPasswordChanged = isPasswordChanged;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + changePasswordInDays;
+		result = prime * result + ((notes == null) ? 0 : notes.hashCode());
+		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + ((title == null) ? 0 : title.hashCode());
+		result = prime * result + ((url == null) ? 0 : url.hashCode());
+		result = prime * result + ((user == null) ? 0 : user.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Entry)) {
+			return false;
+		}
+		Entry other = (Entry) obj;
+		if (changePasswordInDays != other.changePasswordInDays) {
+			return false;
+		}
+		if (notes == null) {
+			if (other.notes != null) {
+				return false;
+			}
+		} else if (!notes.equals(other.notes)) {
+			return false;
+		}
+		if (password == null) {
+			if (other.password != null) {
+				return false;
+			}
+		} else if (!password.equals(other.password)) {
+			return false;
+		}
+		if (title == null) {
+			if (other.title != null) {
+				return false;
+			}
+		} else if (!title.equals(other.title)) {
+			return false;
+		}
+		if (url == null) {
+			if (other.url != null) {
+				return false;
+			}
+		} else if (!url.equals(other.url)) {
+			return false;
+		}
+		if (user == null) {
+			if (other.user != null) {
+				return false;
+			}
+		} else if (!user.equals(other.user)) {
+			return false;
+		}
+		return true;
 	}
 
 }

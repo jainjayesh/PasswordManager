@@ -210,7 +210,7 @@ public final class JPassFrame extends JFrame {
         getContentPane().add(this.statusPanel, BorderLayout.SOUTH);
 
         setJMenuBar(this.menuBar);
-        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         setSize(420, 400);
         setMinimumSize(new Dimension(420, 200));
         addWindowListener(new CloseListener());
@@ -337,7 +337,6 @@ public final class JPassFrame extends JFrame {
             }
         }
         //System.exit(0);
-        this.setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.setVisible(Boolean.FALSE);
     }
 

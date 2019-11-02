@@ -28,6 +28,7 @@
  */
 package jpass.ui;
 
+import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -112,4 +113,25 @@ public final class TextComponentFactory {
         TextComponentActionType.bindAllActions(textArea);
         return textArea;
     }
+    
+    /**
+     * Creates a new {@link JTextArea} instance with a context pop-up menu by default.
+     *
+     * @return the new instance
+     */
+    public static JLabel newLabel() {
+        return newLabel(null);
+    }
+    
+    /**
+     * Creates a new {@link JTextArea} instance with a context pop-up menu by default.
+     *
+     * @param text the initial text
+     * @return the new instance
+     */
+    public static JLabel newLabel(String text) {
+    	JLabel label = text == null ? new JLabel() : new JLabel(text);
+        return label;
+    }
+    
 }

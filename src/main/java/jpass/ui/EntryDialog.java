@@ -28,12 +28,16 @@
  */
 package jpass.ui;
 
+import static jpass.ui.helper.EntryHelper.copyEntryField;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import javax.swing.JButton;
@@ -49,11 +53,12 @@ import javax.swing.SpringLayout;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.commons.validator.routines.UrlValidator;
+
+import jpass.util.Configuration;
 import jpass.util.SpringUtilities;
 import jpass.util.StringUtils;
 import jpass.xml.bind.Entry;
-
-import static jpass.ui.helper.EntryHelper.copyEntryField;
 
 /**
  * A dialog with the entry data.
@@ -76,7 +81,10 @@ public class EntryDialog extends JDialog implements ActionListener {
     private final JPasswordField passwordField;
     private final JPasswordField repeatField;
     private final JTextField urlField;
+    private final JTextField changePasswordInDaysField;
     private final JTextArea notesField;
+    private final JLabel lastModifiedLabel;
+    private final JLabel lastPasswordChangedLabel;
 
     private final JButton okButton;
     private final JButton cancelButton;
@@ -87,6 +95,7 @@ public class EntryDialog extends JDialog implements ActionListener {
     private final char ORIGINAL_ECHO;
 
     private Entry formData;
+    private Entry formDataClone;
 
     private final boolean newEntry;
 
@@ -106,6 +115,7 @@ public class EntryDialog extends JDialog implements ActionListener {
         this.newEntry = newEntry;
 
         this.formData = null;
+        this.formDataClone = entry;
 
         this.fieldPanel = new JPanel();
 
@@ -130,6 +140,18 @@ public class EntryDialog extends JDialog implements ActionListener {
         this.repeatField = TextComponentFactory.newPasswordField(true);
         this.fieldPanel.add(this.repeatField);
 
+        this.fieldPanel.add(new JLabel("Change Password in:"));
+        this.changePasswordInDaysField = TextComponentFactory.newTextField();
+        this.fieldPanel.add(this.changePasswordInDaysField);
+        
+        this.fieldPanel.add(new JLabel("Last Password Changed:"));
+        this.lastPasswordChangedLabel = TextComponentFactory.newLabel();
+        this.fieldPanel.add(this.lastPasswordChangedLabel);
+        
+        this.fieldPanel.add(new JLabel("Last Modified:"));
+        this.lastModifiedLabel = TextComponentFactory.newLabel();
+        this.fieldPanel.add(this.lastModifiedLabel);
+
         this.fieldPanel.add(new JLabel(""));
         this.passwordButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         this.showButton = new JToggleButton("Show", MessageDialog.getIcon("show"));
@@ -151,7 +173,7 @@ public class EntryDialog extends JDialog implements ActionListener {
 
         this.fieldPanel.setLayout(new SpringLayout());
         SpringUtilities.makeCompactGrid(this.fieldPanel,
-                6, 2, //rows, columns
+                9, 2, //rows, columns
                 5, 5, //initX, initY
                 5, 5);    //xPad, yPad
 
@@ -200,6 +222,7 @@ public class EntryDialog extends JDialog implements ActionListener {
             this.passwordField.setEchoChar(this.showButton.isSelected() ? NULL_ECHO : this.ORIGINAL_ECHO);
             this.repeatField.setEchoChar(this.showButton.isSelected() ? NULL_ECHO : this.ORIGINAL_ECHO);
         } else if ("ok_button".equals(command)) {
+        	String regex = "<\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]>"; // matches <http://google.com>
             if (this.titleField.getText().trim().isEmpty()) {
                 MessageDialog.showWarningMessage(this, "Please fill the title field.");
                 return;
@@ -208,6 +231,9 @@ public class EntryDialog extends JDialog implements ActionListener {
                 return;
             } else if (!Arrays.equals(this.passwordField.getPassword(), this.repeatField.getPassword())) {
                 MessageDialog.showWarningMessage(this, "Password and repeated password are not identical.");
+                return;
+            } else if(!new UrlValidator().isValid(urlField.getText().trim())) {
+            	MessageDialog.showWarningMessage(this, "URL is not valid. Please enter valid URL.");
                 return;
             }
             setFormData(fetchDialogData());
@@ -243,6 +269,9 @@ public class EntryDialog extends JDialog implements ActionListener {
         this.urlField.setText(entry.getUrl() == null ? "" : entry.getUrl());
         this.notesField.setText(entry.getNotes() == null ? "" : entry.getNotes());
         this.notesField.setCaretPosition(0);
+        this.changePasswordInDaysField.setText(entry.getChangePasswordInDays() == 0? "" : String.valueOf(entry.getChangePasswordInDays()));
+        this.lastModifiedLabel.setText(entry.getModifiedDate() == null ? "":new SimpleDateFormat(Configuration.getInstance().get("application.date.format", "dd-MMM-yy hh:mm:ss")).format(entry.getModifiedDate()));
+        this.lastPasswordChangedLabel.setText(entry.getLastPasswordChanged() == null ? "":new SimpleDateFormat(Configuration.getInstance().get("application.date.format", "dd-MMM-yy hh:mm:ss")).format(entry.getLastPasswordChanged()));
     }
 
     /**
@@ -258,12 +287,31 @@ public class EntryDialog extends JDialog implements ActionListener {
         String password = StringUtils.stripNonValidXMLCharacters(String.valueOf(this.passwordField.getPassword()));
         String url = StringUtils.stripNonValidXMLCharacters(this.urlField.getText());
         String notes = StringUtils.stripNonValidXMLCharacters(this.notesField.getText());
-
+        String changePasswordInDays = StringUtils.stripNonValidXMLCharacters(this.changePasswordInDaysField.getText());
+        String lastModifiedDate = StringUtils.stripNonValidXMLCharacters(this.lastModifiedLabel.getText());
+        String lastPasswordChangedDate = StringUtils.stripNonValidXMLCharacters(this.lastPasswordChangedLabel.getText());
+        int changePasswordInDaysInt=0;
+        
+        try {
+        	changePasswordInDaysInt=Integer.parseInt(changePasswordInDays);
+        }catch (NumberFormatException e) {
+		}
+        
         entry.setTitle(title == null || title.isEmpty() ? null : title);
         entry.setUser(user == null || user.isEmpty() ? null : user);
         entry.setPassword(password == null || password.isEmpty() ? null : password);
         entry.setUrl(url == null || url.isEmpty() ? null : url);
         entry.setNotes(notes == null || notes.isEmpty() ? null : notes);
+        entry.setChangePasswordInDays(changePasswordInDaysInt);
+        entry.setModified(entry.equals(formDataClone)?Boolean.FALSE:Boolean.TRUE);
+        try {
+			entry.setModifiedDate(lastModifiedDate == null || lastModifiedDate.isEmpty()?null:new SimpleDateFormat(Configuration.getInstance().get("application.date.format", "dd-MMM-yy hh:mm:ss")).parse(lastModifiedLabel.getText()));
+			entry.setLastPasswordChanged(lastPasswordChangedDate == null || lastPasswordChangedDate.isEmpty()?null:new SimpleDateFormat(Configuration.getInstance().get("application.date.format", "dd-MMM-yy hh:mm:ss")).parse(lastPasswordChangedLabel.getText()));
+			if(null != formDataClone && !formDataClone.getPassword().equalsIgnoreCase(password)) {
+				entry.setPasswordChanged(Boolean.TRUE);
+			}
+		} catch (ParseException e) {
+		}
 
         return entry;
     }
