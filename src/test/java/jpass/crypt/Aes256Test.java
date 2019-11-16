@@ -6,6 +6,8 @@ import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
 
+import tirnav.passman.crypt.Aes256;
+
 /**
  * Test values for the &quot;Advanced Encryption Standard&quot; (AES). These values are part of
  * &quot;Federal Information Processing Standards Publication 197&quot;.

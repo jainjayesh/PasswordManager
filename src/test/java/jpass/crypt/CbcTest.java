@@ -9,6 +9,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import tirnav.passman.crypt.Cbc;
+import tirnav.passman.crypt.DecryptException;
+
 /**
  * Unit test for the CBC encryption. The test data will be encrypted and decrypted. The results will
  * be compared.

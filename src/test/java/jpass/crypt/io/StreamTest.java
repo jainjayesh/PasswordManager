@@ -9,8 +9,11 @@ import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
 
+import tirnav.passman.crypt.io.CryptInputStream;
+import tirnav.passman.crypt.io.CryptOutputStream;
+
 /**
- * Tests {@link jpass.crypt.io.CryptInputStream} and {@link jpass.crypt.io.CryptOutputStream}. A
+ * Tests {@link tirnav.passman.crypt.io.CryptInputStream} and {@link tirnav.passman.crypt.io.CryptOutputStream}. A
  * random message will be encrypted and decrypted.
  *
  * @author Timm Knape
