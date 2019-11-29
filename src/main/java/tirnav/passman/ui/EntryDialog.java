@@ -272,7 +272,7 @@ public class EntryDialog extends JDialog implements ActionListener {
         this.urlField.setText(entry.getUrl() == null ? "" : entry.getUrl());
         this.notesField.setText(entry.getNotes() == null ? "" : entry.getNotes());
         this.notesField.setCaretPosition(0);
-        this.changePasswordInDaysField.setValue(entry.getChangePasswordInDays().intValue() == 0? new Integer(0) : String.valueOf(entry.getChangePasswordInDays()));
+        this.changePasswordInDaysField.setValue(entry.getChangePasswordInDays().intValue() == 0? new Integer(0) : entry.getChangePasswordInDays());
         this.lastModifiedLabel.setText(entry.getModifiedDate() == null ? "":new SimpleDateFormat(Configuration.getInstance().get("application.date.format", "dd-MMM-yy hh:mm:ss")).format(entry.getModifiedDate()));
         this.lastPasswordChangedLabel.setText(entry.getLastPasswordChanged() == null ? "":new SimpleDateFormat(Configuration.getInstance().get("application.date.format", "dd-MMM-yy hh:mm:ss")).format(entry.getLastPasswordChanged()));
     }

@@ -48,11 +48,14 @@ public final class Configuration {
 
     private Configuration() {
         try {
-            File filePath = new File("tirnav.passman.properties");
+            File filePath = new File("jpass.properties");
             if (filePath.exists() && filePath.isFile()) {
                 InputStream is = new FileInputStream(filePath);
                 properties.load(is);
                 is.close();
+                System.out.println("Found properties file...");
+            }else {
+            	System.out.println("Couldnt find properties file...");
             }
         } catch (Exception e) {
             LOG.log(Level.WARNING, "An error occurred during loading configuration.", e);

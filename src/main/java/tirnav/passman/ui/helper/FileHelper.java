@@ -91,7 +91,7 @@ public final class FileHelper {
         parent.getSearchPanel().setVisible(false);
         parent.refreshAll();
     }
-
+    
     /**
      * Shows a file chooser dialog and exports the file.
      *
@@ -113,6 +113,66 @@ public final class FileHelper {
             protected Void doInBackground() throws Exception {
                 try {
                     DocumentHelper.newInstance(fileName).writeDocument(parent.getModel().getEntries());
+                } catch (Throwable e) {
+                    throw new Exception("An error occured during the export operation:\n" + e.getMessage());
+                }
+                return null;
+            }
+        };
+        worker.execute();
+    }
+    
+    /**
+     * Shows a file chooser dialog and exports the JSON file.
+     *
+     * @param parent parent component
+     */
+    public static void exportCsvFile(final PasswordManagerFrame parent) {
+        MessageDialog.showWarningMessage(parent,
+                "Please note that all data will be stored unencrypted.\nMake sure you keep the exported file in a secure location.");
+        File file = showFileChooser(parent, "Export", "csv", "CSV Files (*.csv)");
+        if (file == null) {
+            return;
+        }
+        final String fileName = checkExtension(file.getPath(), "csv");
+        if (!checkFileOverwrite(fileName, parent)) {
+            return;
+        }
+        Worker worker = new Worker(parent) {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    DocumentHelper.newInstance(fileName).writeCsvDocument(parent.getModel().getEntries());
+                } catch (Throwable e) {
+                    throw new Exception("An error occured during the export operation:\n" + e.getMessage());
+                }
+                return null;
+            }
+        };
+        worker.execute();
+    }
+
+    /**
+     * Shows a file chooser dialog and exports the JSON file.
+     *
+     * @param parent parent component
+     */
+    public static void exportJsonFile(final PasswordManagerFrame parent) {
+        MessageDialog.showWarningMessage(parent,
+                "Please note that all data will be stored unencrypted.\nMake sure you keep the exported file in a secure location.");
+        File file = showFileChooser(parent, "Export", "json", "JSON Files (*.json)");
+        if (file == null) {
+            return;
+        }
+        final String fileName = checkExtension(file.getPath(), "json");
+        if (!checkFileOverwrite(fileName, parent)) {
+            return;
+        }
+        Worker worker = new Worker(parent) {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    DocumentHelper.newInstance(fileName).writeJsonDocument(parent.getModel().getEntries());
                 } catch (Throwable e) {
                     throw new Exception("An error occured during the export operation:\n" + e.getMessage());
                 }
@@ -208,12 +268,12 @@ public final class FileHelper {
     public static void saveFile(final PasswordManagerFrame parent, final boolean saveAs, final Callback callback) {
         final String fileName;
         if (saveAs || parent.getModel().getFileName() == null) {
-            File file = showFileChooser(parent, "Save", "tirnav.passman", "PasswordManager Data Files (*.tirnav.passman)");
+            File file = showFileChooser(parent, "Save", "pass", "PasswordManager Data Files (*.pass)");
             if (file == null) {
                 callback.call(false);
                 return;
             }
-            fileName = checkExtension(file.getPath(), "tirnav.passman");
+            fileName = checkExtension(file.getPath(), "pass");
             if (!checkFileOverwrite(fileName, parent)) {
                 callback.call(false);
                 return;
@@ -268,7 +328,7 @@ public final class FileHelper {
      * @param parent parent component
      */
     public static void openFile(final PasswordManagerFrame parent) {
-        final File file = showFileChooser(parent, "Open", "tirnav.passman", "PasswordManager Data Files (*.tirnav.passman)");
+        final File file = showFileChooser(parent, "Open", "pass", "PasswordManager Data Files (*.pass)");
         if (file == null) {
             return;
         }

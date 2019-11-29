@@ -38,7 +38,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -47,6 +46,7 @@ import tirnav.passman.crypt.io.CryptInputStream;
 import tirnav.passman.crypt.io.CryptOutputStream;
 import tirnav.passman.xml.bind.Entries;
 import tirnav.passman.xml.bind.Entry;
+import tirnav.passman.xml.converter.JsonConverter;
 import tirnav.passman.xml.converter.XmlConverter;
 
 /**
@@ -71,6 +71,11 @@ public final class DocumentHelper {
      * Converter between document objects and streams representing XMLs
      */
     private static final XmlConverter<Entries> CONVERTER = new XmlConverter<Entries>(Entries.class);
+    
+    /**
+     * Converter between document objects and streams representing XMLs
+     */
+    private static final JsonConverter<Entries> JSON_CONVERTER = new JsonConverter<Entries>(Entries.class);
 
     /**
      * Creates a DocumentHelper instance.
@@ -157,7 +162,59 @@ public final class DocumentHelper {
             }
         }
     }
-
+    
+    /**
+     * Writes a document into an JSON file.
+     *
+     * @param document the document
+     * @throws DocumentProcessException when document format is incorrect
+     * @throws IOException when I/O error occurred
+     */
+    public void writeJsonDocument(final Entries document) throws DocumentProcessException, IOException {
+        OutputStream outputStream = null;
+        try {
+            if (this.key == null) {
+                outputStream = new FileOutputStream(this.fileName);
+            } else {
+                outputStream = new GZIPOutputStream(new CryptOutputStream(new BufferedOutputStream(new FileOutputStream(this.fileName)), this.key));
+            }
+            updateLastModifiedDate(document);
+            JSON_CONVERTER.write(document, outputStream);
+        } catch (Exception e) {
+            throw new DocumentProcessException(stripString(e.getMessage()));
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        }
+    }
+    
+    /**
+     * Writes a document into an JSON file.
+     *
+     * @param document the document
+     * @throws DocumentProcessException when document format is incorrect
+     * @throws IOException when I/O error occurred
+     */
+    public void writeCsvDocument(final Entries document) throws DocumentProcessException, IOException {
+        OutputStream outputStream = null;
+        try {
+            if (this.key == null) {
+                outputStream = new FileOutputStream(this.fileName);
+            } else {
+                outputStream = new GZIPOutputStream(new CryptOutputStream(new BufferedOutputStream(new FileOutputStream(this.fileName)), this.key));
+            }
+            updateLastModifiedDate(document);
+            JSON_CONVERTER.writeCSV(document, outputStream);
+        } catch (Exception e) {
+            throw new DocumentProcessException(stripString(e.getMessage()));
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        }
+    }
+    
 	private void updateLastModifiedDate(Entries document) {
 		for(Entry e :document.getEntry()) {
 			if(e.isModified()) {

@@ -42,6 +42,7 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
+import tirnav.passman.data.DocumentHelper;
 import tirnav.passman.ui.GeneratePasswordDialog;
 import tirnav.passman.ui.PasswordManagerFrame;
 import tirnav.passman.ui.MessageDialog;
@@ -53,6 +54,8 @@ import static javax.swing.KeyStroke.getKeyStroke;
 import static tirnav.passman.ui.MessageDialog.getIcon;
 import static tirnav.passman.ui.helper.FileHelper.createNew;
 import static tirnav.passman.ui.helper.FileHelper.exportFile;
+import static tirnav.passman.ui.helper.FileHelper.exportJsonFile;
+import static tirnav.passman.ui.helper.FileHelper.exportCsvFile;
 import static tirnav.passman.ui.helper.FileHelper.importFile;
 import static tirnav.passman.ui.helper.FileHelper.openFile;
 import static tirnav.passman.ui.helper.FileHelper.saveFile;
@@ -104,6 +107,22 @@ public enum MenuActionType {
         @Override
         public void actionPerformed(ActionEvent ev) {
             exportFile(PasswordManagerFrame.getInstance());
+        }
+    }),
+    EXPORT_JSON(new AbstractMenuAction("Export to JSON...", getIcon("json"), null) {
+        private static final long serialVersionUID = 7673408373934859054L;
+
+        @Override
+        public void actionPerformed(ActionEvent ev) {
+            exportJsonFile(PasswordManagerFrame.getInstance());
+        }
+    }),
+    EXPORT_CSV(new AbstractMenuAction("Export to CSV...", getIcon("csv"), null) {
+        private static final long serialVersionUID = 7673408373934859054L;
+
+        @Override
+        public void actionPerformed(ActionEvent ev) {
+            exportCsvFile(PasswordManagerFrame.getInstance());
         }
     }),
     IMPORT_XML(new AbstractMenuAction("Import from XML...", getIcon("import"), null) {
@@ -256,27 +275,37 @@ public enum MenuActionType {
             PasswordManagerFrame.getInstance().getSearchPanel().setVisible(true);
         }
     }),
-    OPEN_URL(new AbstractMenuAction("Open URL in Browser", getIcon("open_url"), getKeyStroke(KeyEvent.VK_U, CTRL_MASK)) {
+    OPEN_URL(new AbstractMenuAction("Open URL in Browser", getIcon("open_url"), getKeyStroke(KeyEvent.VK_B , CTRL_MASK)) {
         private static final long serialVersionUID = -7621614933053924326L;
 
         @Override
         public void actionPerformed(ActionEvent ev) {
         	PasswordManagerFrame parent = PasswordManagerFrame.getInstance();
+        	Worker worker = new Worker(parent) {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    try {
+                    	Toast t = new Toast("Username copied to clipboard.", 150, 400); 
+            	        // call the method 
+            	        t.showToast(); 
+                    } catch (Throwable e) {
+                        throw new Exception("An error occured during the export operation:\n" + e.getMessage());
+                    }
+                    return null;
+                }
+            };
+            worker.execute();
+            try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
             Entry entry = EntryHelper.getSelectedEntry(parent);
             if (entry != null) {
                 EntryHelper.copyEntryField(parent, entry.getPassword());
             	if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             	    try {
-            	    	//MessageDialog.showWarningMessage(parent, "Username copied to clipboard.");
             	    	// create a toast message 
-            	    	new Thread(new Runnable() {
-							public void run() {
-								Toast t = new Toast("Username copied to clipboard.", 150, 400); 
-		            	        // call the method 
-		            	        t.showToast(); 
-							}
-						});
-            	        
             	    	EntryHelper.copyEntryField(parent, entry.getUser());
 						Desktop.getDesktop().browse(new URI(entry.getUrl()));
 					} catch (IOException e) {

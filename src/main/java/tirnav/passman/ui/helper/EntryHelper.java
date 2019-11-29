@@ -28,6 +28,8 @@
  */
 package tirnav.passman.ui.helper;
 
+import javax.swing.table.DefaultTableModel;
+
 import tirnav.passman.ui.EntryDialog;
 import tirnav.passman.ui.PasswordManagerFrame;
 import tirnav.passman.ui.MessageDialog;
@@ -94,15 +96,18 @@ public final class EntryHelper {
      * @param parent parent component
      */
     public static void editEntry(PasswordManagerFrame parent) {
-        if (parent.getEntryTitleList().getSelectedIndex() == -1) {
+        //if (parent.getEntryTitleList().getSelectedIndex() == -1) {
+    	if (parent.getDataTable().getSelectedRow() == -1) {
             MessageDialog.showWarningMessage(parent, "Please select an entry.");
             return;
         }
-        String title = (String) parent.getEntryTitleList().getSelectedValue();
+        String title = (String) parent.getDataTable(). getValueAt(parent.getDataTable().getSelectedRow(),1);
         Entry oldEntry = parent.getModel().getEntryByTitle(title);
+        int row = parent.getDataTable().convertRowIndexToModel(parent.getDataTable().getSelectedRow());
         EntryDialog ed = new EntryDialog(parent, "Edit Entry", oldEntry, false);
         if (ed.getFormData() != null) {
             parent.getModel().getEntries().getEntry().remove(oldEntry);
+            ((DefaultTableModel)parent.getDataTable().getModel()).removeRow(row);
             parent.getModel().getEntries().getEntry().add(ed.getFormData());
             parent.getModel().setModified(true);
             parent.refreshFrameTitle();
@@ -132,11 +137,14 @@ public final class EntryHelper {
      * @return the entry or null
      */
     public static Entry getSelectedEntry(PasswordManagerFrame parent) {
-        if (parent.getEntryTitleList().getSelectedIndex() == -1) {
+        //if (parent.getEntryTitleList().getSelectedIndex() == -1) {
+    	if (parent.getDataTable().getSelectedRow() == -1) {
             MessageDialog.showWarningMessage(parent, "Please select an entry.");
             return null;
         }
-        return parent.getModel().getEntryByTitle((String) parent.getEntryTitleList().getSelectedValue());
+        //return parent.getModel().getEntryByTitle((String) parent.getEntryTitleList().getSelectedValue());
+    	return parent.getModel().getEntryByTitle((String) parent.getDataTable().getValueAt(parent.getDataTable().getSelectedRow(),0));
+        
     }
 
     /**

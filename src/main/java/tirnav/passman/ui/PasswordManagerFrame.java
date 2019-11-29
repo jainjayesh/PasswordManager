@@ -35,26 +35,41 @@ import static tirnav.passman.ui.MessageDialog.getIcon;
 import static tirnav.passman.ui.MessageDialog.showQuestionMessage;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import tirnav.passman.data.DataModel;
+import tirnav.passman.model.EntryTableModel;
 import tirnav.passman.ui.action.Callback;
 import tirnav.passman.ui.action.CloseListener;
 import tirnav.passman.ui.action.ListListener;
@@ -62,6 +77,8 @@ import tirnav.passman.ui.action.MenuActionType;
 import tirnav.passman.ui.helper.EntryHelper;
 import tirnav.passman.ui.helper.FileHelper;
 import tirnav.passman.util.Configuration;
+import tirnav.passman.util.IconStorage;
+import tirnav.passman.xml.bind.Entry;
 
 /**
  * The main frame for PasswordManager.
@@ -92,6 +109,8 @@ public final class PasswordManagerFrame extends JFrame {
     private final JList entryTitleList;
     private final DefaultListModel entryTitleListModel;
     private final DataModel model = DataModel.getInstance();
+    private final JTable dataTable;
+    private final DefaultTableModel dataModel;
     private final StatusPanel statusPanel;
     private volatile boolean processing = false;
 
@@ -103,7 +122,7 @@ public final class PasswordManagerFrame extends JFrame {
         }
 
         this.toolBar = new JToolBar();
-        this.toolBar.setFloatable(false);
+        toolBar.setFloatable(false);
         this.toolBar.add(MenuActionType.NEW_FILE.getAction());
         this.toolBar.add(MenuActionType.OPEN_FILE.getAction());
         this.toolBar.add(MenuActionType.SAVE_FILE.getAction());
@@ -145,6 +164,8 @@ public final class PasswordManagerFrame extends JFrame {
         this.fileMenu.add(MenuActionType.SAVE_AS_FILE.getAction());
         this.fileMenu.addSeparator();
         this.fileMenu.add(MenuActionType.EXPORT_XML.getAction());
+        this.fileMenu.add(MenuActionType.EXPORT_JSON.getAction());
+        this.fileMenu.add(MenuActionType.EXPORT_CSV.getAction());
         this.fileMenu.add(MenuActionType.IMPORT_XML.getAction());
         this.fileMenu.addSeparator();
         this.fileMenu.add(MenuActionType.CHANGE_PASSWORD.getAction());
@@ -198,8 +219,62 @@ public final class PasswordManagerFrame extends JFrame {
         this.entryTitleList.addMouseListener(new ListListener());
         this.entryTitleList.setCellRenderer(new IconedListCellRenderer());
 
-        this.scrollPane = new JScrollPane(this.entryTitleList);
-        MenuActionType.bindAllActions(this.entryTitleList);
+        //table
+        this.dataModel= new EntryTableModel(model.getEntries().getEntry());
+        this.dataTable= new JTable(dataModel){
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
+                Component returnComp = super.prepareRenderer(renderer, row, column);
+                Color alternateColor = new Color(252,242,206);
+                Color whiteColor = Color.WHITE;
+                if (!returnComp.getBackground().equals(getSelectionBackground())){
+                    Color bg = (row % 2 == 0 ? alternateColor : whiteColor);
+                    returnComp .setBackground(bg);
+                    bg = null;
+                }
+                return returnComp;
+        }
+            public String getToolTipText(MouseEvent event) {
+                Point p = event.getPoint();
+
+                // Locate the renderer under the event location
+                int rowIndex = rowAtPoint(p);
+                int colIndex = columnAtPoint(p);
+                
+                if(colIndex == 0) {
+                	return "";
+                }
+                
+                Object value = this.getModel().getValueAt(rowIndex, colIndex);
+                return null != value?value.toString():"";
+            }
+        }; 
+        this.dataTable.setAutoCreateRowSorter(Boolean.TRUE);
+        
+        TableRowSorter<TableModel> sorter = new TableRowSorter(this.dataTable.getModel());
+        this.dataTable.setRowSorter(sorter);
+        List<RowSorter.SortKey> sortKeys = new ArrayList();
+         
+        int columnIndexToSort = 1;
+        sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING));
+         
+        sorter.setSortKeys(sortKeys);
+        sorter.sort();
+        
+        this.dataTable.getColumnModel().getColumn(0).setPreferredWidth(30);
+        this.dataTable.getColumnModel().getColumn(1).setPreferredWidth(175);
+        //this.dataTable.getColumnModel().getColumn(0).setCellRenderer(new IconedListCellRenderer());
+        this.dataTable.getColumnModel().getColumn(2).setPreferredWidth(175);
+        this.dataTable.getColumnModel().getColumn(3).setPreferredWidth(90);
+        this.dataTable.getColumnModel().getColumn(4).setPreferredWidth(90);
+        this.dataTable.getColumnModel().getColumn(5).setPreferredWidth(150);
+        
+        this.dataTable.addMouseListener(new ListListener());
+        this.dataTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        this.scrollPane = new JScrollPane(this.dataTable);
+        MenuActionType.bindAllActions(this.dataTable);
+        
+        //this.scrollPane = new JScrollPane(this.entryTitleList);
+        //MenuActionType.bindAllActions(this.entryTitleList);
 
         this.statusPanel = new StatusPanel();
 
@@ -211,8 +286,8 @@ public final class PasswordManagerFrame extends JFrame {
 
         setJMenuBar(this.menuBar);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-        setSize(420, 400);
-        setMinimumSize(new Dimension(420, 200));
+        setSize(650, 400);
+        setMinimumSize(new Dimension(650, 200));
         addWindowListener(new CloseListener());
         setLocationRelativeTo(null);
         setVisible(true);
@@ -247,6 +322,13 @@ public final class PasswordManagerFrame extends JFrame {
     }
 
     /**
+	 * @return the dataTable
+	 */
+	public JTable getDataTable() {
+		return dataTable;
+	}
+
+	/**
      * Gets the data model of this frame.
      *
      * @return data model
@@ -261,6 +343,7 @@ public final class PasswordManagerFrame extends JFrame {
     public void clearModel() {
         this.model.clear();
         this.entryTitleListModel.clear();
+        this.dataModel.setRowCount(0);
     }
 
     /**
@@ -278,7 +361,10 @@ public final class PasswordManagerFrame extends JFrame {
      * @param selectTitle title to select, or {@code null} if nothing to select
      */
     public void refreshEntryTitleList(String selectTitle) {
+    	IconStorage iconStorage = IconStorage.newInstance();
+    	
         this.entryTitleListModel.clear();
+        this.dataModel.setRowCount(0);
         List<String> titles = this.model.getTitles();
         Collections.sort(titles, String.CASE_INSENSITIVE_ORDER);
 
@@ -286,6 +372,10 @@ public final class PasswordManagerFrame extends JFrame {
         for (String title : titles) {
             if (searchCriteria.isEmpty() || title.toLowerCase().contains(searchCriteria.toLowerCase())) {
                 this.entryTitleListModel.addElement(title);
+                Entry entry = this.model.getEntryByTitle(title);
+                JLabel label = new JLabel(title);
+                label.setIcon(iconStorage.getIcon(entry.getUrl()));
+                this.dataModel.addRow(new Object[]{ label.getIcon() , title, entry.getUser(), entry.getModifiedDate(),entry.getLastPasswordChanged(),entry.getChangePasswordInDays()});
             }
         }
 

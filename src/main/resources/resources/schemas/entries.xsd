@@ -24,6 +24,11 @@
       <xs:element name="user" type="xs:string" minOccurs="0" />
       <xs:element name="password" type="xs:string" minOccurs="0" />
       <xs:element name="notes" type="xs:string" minOccurs="0" />
+      <xs:element name="modifiedDate" type="xs:string"/>
+      <xs:element name="lastPasswordChanged" type="xs:string" />
+      <xs:element name="changePasswordInDays" type="xs:byte" />
+      <xs:element name="modified" type="xs:string" />
+      <xs:element name="passwordChanged" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

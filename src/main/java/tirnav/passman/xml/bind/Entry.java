@@ -2,6 +2,10 @@ package tirnav.passman.xml.bind;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * <p>
  * Java class for entry complex type.
@@ -43,12 +47,16 @@ public class Entry {
     protected Date modifiedDate;
     protected Date lastPasswordChanged;
     protected Integer changePasswordInDays;
-    protected boolean isModified;
-    protected boolean isPasswordChanged;
+    @XmlTransient
+    @JsonIgnore
+    private boolean isModified;
+    @XmlTransient
+    private boolean isPasswordChanged;
 
     /**
 	 * @return the isModified
 	 */
+    @JsonIgnore
 	public boolean isModified() {
 		return isModified;
 	}
@@ -56,6 +64,7 @@ public class Entry {
 	/**
 	 * @param isModified the isModified to set
 	 */
+    @JsonIgnore
 	public void setModified(boolean isModified) {
 		this.isModified = isModified;
 	}
@@ -205,6 +214,7 @@ public class Entry {
 	/**
 	 * @return the isPasswordChanged
 	 */
+	@JsonIgnore
 	public boolean isPasswordChanged() {
 		return isPasswordChanged;
 	}
@@ -212,6 +222,7 @@ public class Entry {
 	/**
 	 * @param isPasswordChanged the isPasswordChanged to set
 	 */
+	@JsonIgnore
 	public void setPasswordChanged(boolean isPasswordChanged) {
 		this.isPasswordChanged = isPasswordChanged;
 	}

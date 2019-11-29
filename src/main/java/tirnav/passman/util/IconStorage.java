@@ -32,14 +32,14 @@ public class IconStorage {
 
     private static final Logger LOG = Logger.getLogger(IconStorage.class.getName());
     private static final String FAVICON_PROVIDER_URL_PATTERN = "https://www.google.com/s2/favicons?domain=%s";
-    private static final ImageIcon DEFAULT_ICON = new ImageIcon(IconStorage.class.getClassLoader()
-            .getResource("resources/images/keyring.png"));
+    private static final ImageIcon DEFAULT_ICON = new ImageIcon(IconStorage.class
+            .getResource("/resources/images/keyring.png"));
     private static final String ICONS = "icons";
     private final Map<String, ImageIcon> icons = new HashMap<String, ImageIcon>();
     private final boolean enabled;
 
     private IconStorage() {
-        enabled = Configuration.getInstance().is("fetch.favicons.enabled", false);
+        enabled = Configuration.getInstance().is("fetch.favicons.enabled", true);
         if (enabled && !new File(ICONS).exists()) {
             new File(ICONS).mkdir();
         }

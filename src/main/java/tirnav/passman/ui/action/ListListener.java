@@ -32,7 +32,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JList;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 import tirnav.passman.ui.PasswordManagerFrame;
@@ -91,10 +91,12 @@ public class ListListener extends MouseAdapter {
             return;
         }
         if (evt.isPopupTrigger()) {
-            JList list = PasswordManagerFrame.getInstance().getEntryTitleList();
+            //JList list = PasswordManagerFrame.getInstance().getEntryTitleList(); TODO
+        	JTable list = PasswordManagerFrame.getInstance().getDataTable();
             if (list.isEnabled()) {
                 Point point = new Point(evt.getX(), evt.getY());
-                list.setSelectedIndex(list.locationToIndex(point));
+                //list.setSelectedIndex(list.locationToIndex(point)); TODO
+                list.setRowSelectionInterval(0, list.rowAtPoint(point));
                 PasswordManagerFrame.getInstance().getPopup().show(evt.getComponent(), evt.getX(), evt.getY());
             }
         }

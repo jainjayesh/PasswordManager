@@ -28,6 +28,8 @@
  */
 package tirnav.passman.xml.converter;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -67,7 +69,7 @@ public class XmlConverter<T> {
     public void write(T document, OutputStream outputStream) throws IOException {
         mapper.writeValue(outputStream, document);
     }
-
+    
     /**
      * Maps the given input stream to a document object.
      *
